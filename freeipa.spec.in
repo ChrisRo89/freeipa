@@ -432,9 +432,11 @@ BuildRequires:  jsl
 %if 0%{?suse_version}
 BuildRequires:  python3-dnspython >= 1.15
 BuildRequires:  python3-Jinja2
+BuildRequires:  python3-sssd-config >= %{sssd_version}
 %else
 BuildRequires:  python3-dns >= 1.15
 BuildRequires:  python3-jinja2
+BuildRequires:  python3-sssdconfig >= %{sssd_version}
 %endif
 
 BuildRequires:  git
@@ -472,7 +474,6 @@ BuildRequires:  python3-samba
 BuildRequires:  python3-six
 BuildRequires:  python3-sss
 BuildRequires:  python3-sss-murmur
-BuildRequires:  python3-sssdconfig >= %{sssd_version}
 BuildRequires:  python3-systemd
 BuildRequires:  python3-yaml
 BuildRequires:  python3-yubico
@@ -623,8 +624,10 @@ Requires: %{name}-common = %{version}-%{release}
 Requires(pre): python3-ldap >= %{python_ldap_version}
 %if 0%{?suse_version}
 Requires: python3-dbus-python
+Requires: python3-sssd-config >= %{sssd_version}
 %else
 Requires: python3-dbus
+Requires: python3-sssdconfig >= %{sssd_version}
 %endif
 Requires: python3-augeas
 Requires: augeas-libs >= %{augeas_version}
@@ -634,7 +637,6 @@ Requires: python3-kdcproxy >= %{kdcproxy_version}
 Requires: python3-lxml
 Requires: python3-pki >= %{pki_version}
 Requires: python3-pyasn1 >= 0.3.2-2
-Requires: python3-sssdconfig >= %{sssd_version}
 Requires: python3-psutil
 Requires: rpm-libs
 %if 0%{?rhel}
@@ -768,12 +770,17 @@ dependencies at once.
 
 %package client
 Summary: IPA authentication for use on clients
+%if 0%{?suse_version}
+Requires: python3-sssd-config >= %{sssd_version}
+%else
+Requires: python3-sssdconfig >= %{sssd_version}
+Requires: libsss_autofs
+%endif
 Requires: %{name}-client-common = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 Requires: python3-gssapi >= 1.2.0-5
 Requires: python3-ipaclient = %{version}-%{release}
 Requires: python3-ldap >= %{python_ldap_version}
-Requires: python3-sssdconfig >= %{sssd_version}
 Requires: cyrus-sasl-gssapi%{?_isa}
 Requires: chrony
 Requires: krb5-workstation >= %{krb5_version}
@@ -809,7 +816,6 @@ Requires: certmonger >= %{certmonger_version}
 Requires: nss-tools >= %{nss_version}
 Requires: bind-utils
 Requires: oddjob-mkhomedir
-Requires: libsss_autofs
 Requires: autofs
 
 Requires: (nfs-utils or nfsv4-client-utils)
@@ -997,7 +1003,7 @@ Requires: keyutils
 Requires: python3-argcomplete
 Requires: python3-cffi
 Requires: python3-cryptography >= 1.6
-Requires: python3-dateutil
+Requires: python3-dateutila
 Requires: python3-gssapi >= 1.2.0
 Requires: python3-jwcrypto >= 0.4.2
 Requires: python3-libipa_hbac
@@ -1062,6 +1068,11 @@ If you are using IPA, you need to install this package.
 Summary: IPA tests and test tools
 BuildArch: noarch
 %{?python_provide:%python_provide python3-ipatests}
+%if 0%{?suse_version}
+Requires: python3-sssd-config >= %{sssd_version}
+%else
+Requires: python3-sssdconfig >= %{sssd_version}
+%endif
 Requires: python3-ipaclient = %{version}-%{release}
 Requires: python3-ipaserver = %{version}-%{release}
 Requires: iptables
@@ -1079,7 +1090,6 @@ Requires: python3-pytest-multihost >= 0.5
 Requires: python3-pytest-sourceorder
 Requires: sshpass
 %endif
-Requires: python3-sssdconfig >= %{sssd_version}
 Requires: tar
 Requires: xz
 Requires: openssh-clients
