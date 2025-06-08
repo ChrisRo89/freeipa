@@ -306,7 +306,7 @@ BuildRequires:  pkgconfig(krb5)
 BuildRequires:  xmlrpc-c-devel >= 1.27.4
 %else
 BuildRequires:  libcurl-devel
-%if %0{?suse_version}
+%if 0%{?suse_version}
 BuildRequires:  libjansson-devel
 %else
 BuildRequires:  jansson-devel
@@ -331,11 +331,11 @@ BuildRequires:  openssl-devel
 BuildRequires:  libini_config-devel
 BuildRequires:  cyrus-sasl-devel
 %if ! %{ONLY_CLIENT}
-%if 0{?suse_version}
+%if 0%{?suse_version}
 BuildRequires:  389-ds-devel >= %{ds_version}
 %else
 BuildRequires:  389-ds-base-devel >= %{ds_version}
-%end
+%endif
 BuildRequires:  samba-devel >= %{samba_version}
 BuildRequires:  libtalloc-devel
 BuildRequires:  libtevent-devel
