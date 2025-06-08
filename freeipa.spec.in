@@ -63,7 +63,7 @@
     %global modulename ipa
 %endif
 
-%if 0%{?rhel}
+%if 0%{?rhel} || 0%{?suse_version}
 %global package_name ipa
 %global alt_name freeipa
 %global krb5_version 1.20.1-1
@@ -352,8 +352,10 @@ BuildRequires: nodejs(abi)
 BuildRequires:  nodejs(abi) < 127
 %elif 0%{?suse_version}
 BuildRequires:  nodejs22
+BuildRequires:  cracklib-dict-full
 %else
 BuildRequires:  nodejs(abi) < 111
+BuildRequires:  cracklib-dicts
 %endif
 # use old dependency on RHEL 8 for now
 %if 0%{?fedora} >= 31 || 0%{?rhel} >= 9 || 0%{?suse_version}
@@ -366,7 +368,6 @@ BuildRequires:  libunistring-devel
 # 0.13.0: https://bugzilla.redhat.com/show_bug.cgi?id=1584773
 # 0.13.0-2: fix for missing dependency on python-six
 BuildRequires:  python3-lesscpy >= 0.13.0-2
-BuildRequires:  cracklib-dicts
 # ONLY_CLIENT
 %endif
 
