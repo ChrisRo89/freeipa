@@ -507,20 +507,26 @@ and integration with Active Directory based infrastructures (Trusts).
 Summary: The IPA authentication server
 %if 0%{?suse_version}
 Requires: cracklib-dict-full
+Requires: 389-ds >= %{ds_version}
+Requires: mozilla-nss-tools >= %{nss_version}
+Requires: apache2-mod_auth_gssapi >= 1.5.0
 %else
 Requires: cracklib-dicts
+Requires: 389-ds-base >= %{ds_version}
+Requires: krb5-kdb-version = %{krb5_kdb_version}
+Requires: nss-tools >= %{nss_version}
+Requires: mod_auth_gssapi >= 1.5.0
+Requires: mod_ssl >= %{httpd_version}
+Requires: mod_session >= %{httpd_version}
 %endif
 Requires: %{name}-server-common = %{version}-%{release}
 Requires: %{name}-client = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 Requires: python3-ipaserver = %{version}-%{release}
 Requires: python3-ldap >= %{python_ldap_version}
-Requires: 389-ds-base >= %{ds_version}
 Requires: openldap-clients > 2.4.35-4
-Requires: nss-tools >= %{nss_version}
 Requires(post): krb5-server >= %{krb5_version}
 Requires(post): krb5-server >= %{krb5_base_version}
-Requires: krb5-kdb-version = %{krb5_kdb_version}
 Requires: cyrus-sasl-gssapi%{?_isa}
 Requires: chrony
 Requires: httpd >= %{httpd_version}
@@ -529,9 +535,7 @@ Requires(postun): python3
 Requires: python3-gssapi >= 1.2.0-5
 Requires: python3-systemd
 Requires: python3-mod_wsgi
-Requires: mod_auth_gssapi >= 1.5.0
-Requires: mod_ssl >= %{httpd_version}
-Requires: mod_session >= %{httpd_version}
+
 # 0.9.9: https://github.com/adelton/mod_lookup_identity/pull/3
 Requires: mod_lookup_identity >= 0.9.9
 Requires: acl
