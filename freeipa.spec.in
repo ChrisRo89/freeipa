@@ -133,11 +133,13 @@
 # version supporting LMDB and lib389.cli_ctl.dblib.run_dbscan utility
 %if 0%{?fedora} < 34
 %global ds_version 1.4.4.16-1
-%elif 0%{?fedora} == 40
-%global ds_version 3.0.4-3
-%elif 0%{?fedora} >= 41
-%global ds_version 3.1.1-3
 %else
+%if 0%{?fedora} == 40
+%global ds_version 3.0.4-3
+%endif
+%if 0%{?fedora} >= 41
+%global ds_version 3.1.1-3
+%endif
 %global ds_version 2.1.0
 %endif
 
