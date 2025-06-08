@@ -293,14 +293,14 @@ BuildRequires:  gnupg2
 BuildRequires:  pkgconfig
 BuildRequires:  httpd
 BuildRequires:  nspr-devel
+BuildRequires:  krb5-kdb-version = %{krb5_kdb_version}
+BuildRequires:  krb5-kdb-devel-version = %{krb5_kdb_version}
+BuildRequires:  pkgconfig(krb5)
 %endif
 # For KDB DAL version, make explicit dependency so that increase of version
 # will cause the build to fail due to unsatisfied dependencies.
 # DAL version change may cause code crash or memory leaks, it is better to fail early.
-BuildRequires:  krb5-kdb-version = %{krb5_kdb_version}
-BuildRequires:  krb5-kdb-devel-version = %{krb5_kdb_version}
 BuildRequires:  krb5-devel >= %{krb5_version}
-BuildRequires:  pkgconfig(krb5)
 %if %{with ipa_join_xml}
 # 1.27.4: xmlrpc_curl_xportparms.gssapi_delegation
 BuildRequires:  xmlrpc-c-devel >= 1.27.4
@@ -374,10 +374,15 @@ BuildRequires:  python3-lesscpy >= 0.13.0-2
 #
 # Build dependencies for makeapi/makeaci
 #
-BuildRequires:  python3-cffi
+%if 0%{?suse_version}
+BuildRequires:  python3-dnspython
+BuildRequires:  python3-sss_nss_idmap
+%else
 BuildRequires:  python3-dns
-BuildRequires:  python3-ldap >= %{python_ldap_version}
 BuildRequires:  python3-libsss_nss_idmap
+%endif
+BuildRequires:  python3-cffi
+BuildRequires:  python3-ldap >= %{python_ldap_version}
 BuildRequires:  python3-netaddr >= %{python_netaddr_version}
 BuildRequires:  python3-pyasn1
 BuildRequires:  python3-pyasn1-modules
@@ -422,6 +427,12 @@ BuildRequires:  python3-pexpect
 BuildRequires:  jsl
 %endif
 
+%if 0%{?suse_version}
+BuildRequires:  python3-dnspython >= 1.15
+%else
+BuildRequires:  python3-dns >= 1.15
+%endif
+
 BuildRequires:  git
 BuildRequires:  nss-tools
 BuildRequires:  rpmlint
@@ -432,8 +443,6 @@ BuildRequires:  python3-augeas
 BuildRequires:  python3-cffi
 BuildRequires:  python3-cryptography >= 1.6
 BuildRequires:  python3-dateutil
-BuildRequires:  python3-dbus
-BuildRequires:  python3-dns >= 1.15
 BuildRequires:  python3-docker
 BuildRequires:  python3-gssapi >= 1.2.0
 BuildRequires:  python3-jinja2
@@ -494,6 +503,11 @@ and integration with Active Directory based infrastructures (Trusts).
 
 %package server
 Summary: The IPA authentication server
+%if 0%{?suse_version}
+Requires: cracklib-dict-full
+%else
+Requires: cracklib-dicts
+%endif
 Requires: %{name}-server-common = %{version}-%{release}
 Requires: %{name}-client = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
@@ -553,7 +567,6 @@ Requires: oddjob
 Requires: gssproxy >= 0.7.0-2
 Requires: sssd-dbus >= %{sssd_version}
 Requires: libpwquality
-Requires: cracklib-dicts
 # NDR libraries are internal in Samba and change with version without changing SONAME
 %ipa_requires_gt samba-client-libs
 
@@ -591,6 +604,11 @@ If you are installing an IPA server, you need to install this package.
 %package -n python3-ipaserver
 Summary: Python libraries used by IPA server
 BuildArch: noarch
+%if 0%{?suse_version}
+Requires: python3-dnspython >= 1.15
+%else
+Requires: python3-dns >= 1.15
+%endif
 %{?python_provide:%python_provide python3-ipaserver}
 Requires: %{name}-server-common = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
@@ -599,7 +617,6 @@ Requires(pre): python3-ldap >= %{python_ldap_version}
 Requires: python3-augeas
 Requires: augeas-libs >= %{augeas_version}
 Requires: python3-dbus
-Requires: python3-dns >= 1.15
 Requires: python3-gssapi >= 1.2.0
 Requires: python3-ipaclient = %{version}-%{release}
 Requires: python3-kdcproxy >= %{kdcproxy_version}
