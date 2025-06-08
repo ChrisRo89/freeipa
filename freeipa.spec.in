@@ -281,7 +281,21 @@ Patch1001:      1001-Change-branding-to-IPA-and-Identity-Management.patch
 %endif
 # RHEL spec file only: END
 
+%if 0%{?suse_version}
+BuildRequires:  openldap2-devel
+BuildRequires:  gpg2
+BuildRequires:  pkg-config
+BuildRequires:  apache2
+BuildRequires:  mozilla-nspr-devel
+BuildRequires:  389-ds-devel >= %{ds_version}
+%else
 BuildRequires:  openldap-devel
+BuildRequires:  gnupg2
+BuildRequires:  pkgconfig
+BuildRequires:  httpd
+BuildRequires:  nspr-devel
+BuildRequires:  389-ds-base-devel >= %{ds_version}
+%endif
 # For KDB DAL version, make explicit dependency so that increase of version
 # will cause the build to fail due to unsatisfied dependencies.
 # DAL version change may cause code crash or memory leaks, it is better to fail early.
@@ -294,13 +308,15 @@ BuildRequires:  pkgconfig(krb5)
 BuildRequires:  xmlrpc-c-devel >= 1.27.4
 %else
 BuildRequires:  libcurl-devel
+%if %0{?suse_version}
+BuildRequires:  libjansson-devel
+%else
 BuildRequires:  jansson-devel
+%endif
 %endif
 BuildRequires:  popt-devel
 BuildRequires:  gcc
-BuildRequires:  gnupg2
 BuildRequires:  make
-BuildRequires:  pkgconfig
 BuildRequires:  pkgconf
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -313,13 +329,10 @@ BuildRequires:  python3-setuptools
 BuildRequires:  python3-argcomplete
 BuildRequires:  systemd >= %{systemd_version}
 # systemd-tmpfiles which is executed from make install requires apache user
-BuildRequires:  httpd
-BuildRequires:  nspr-devel
 BuildRequires:  openssl-devel
 BuildRequires:  libini_config-devel
 BuildRequires:  cyrus-sasl-devel
 %if ! %{ONLY_CLIENT}
-BuildRequires:  389-ds-base-devel >= %{ds_version}
 BuildRequires:  samba-devel >= %{samba_version}
 BuildRequires:  libtalloc-devel
 BuildRequires:  libtevent-devel
@@ -334,11 +347,13 @@ BuildRequires: nodejs(abi)
 %elif 0%{?fedora} >= 39
 # Do not use nodejs20 on fedora < 39, https://pagure.io/freeipa/issue/9374
 BuildRequires:  nodejs(abi) < 127
+%elif 0%{?suse_version}
+BuildRequires:  nodejs22
 %else
 BuildRequires:  nodejs(abi) < 111
 %endif
 # use old dependency on RHEL 8 for now
-%if 0%{?fedora} >= 31 || 0%{?rhel} >= 9
+%if 0%{?fedora} >= 31 || 0%{?rhel} >= 9 || 0%{?suse_version}
 BuildRequires:  python3-rjsmin
 %else
 BuildRequires:  uglify-js
