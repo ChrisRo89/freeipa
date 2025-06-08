@@ -431,8 +431,10 @@ BuildRequires:  jsl
 
 %if 0%{?suse_version}
 BuildRequires:  python3-dnspython >= 1.15
+BuildRequires:  python3-Jinja2
 %else
 BuildRequires:  python3-dns >= 1.15
+BuildRequires:  python3-jinja2
 %endif
 
 BuildRequires:  git
@@ -447,7 +449,6 @@ BuildRequires:  python3-cryptography >= 1.6
 BuildRequires:  python3-dateutil
 BuildRequires:  python3-docker
 BuildRequires:  python3-gssapi >= 1.2.0
-BuildRequires:  python3-jinja2
 BuildRequires:  python3-jwcrypto >= 0.4.2
 BuildRequires:  python3-ldap >= %{python_ldap_version}
 BuildRequires:  python3-ldap >= %{python_ldap_version}
@@ -794,8 +795,11 @@ Requires: xmlrpc-c >= 1.27.4
 %else
 %if 0%{?suse_version}
 Requires: libjansson4
+Requires: libnfsidmap1
+Requires: libnfsidmap-sss
 %else
 Requires: jansson
+Requires: libnfsidmap
 %endif
 %endif
 Requires: sssd-ipa >= %{sssd_version}
@@ -807,7 +811,7 @@ Requires: bind-utils
 Requires: oddjob-mkhomedir
 Requires: libsss_autofs
 Requires: autofs
-Requires: libnfsidmap
+
 Requires: (nfs-utils or nfsv4-client-utils)
 Requires: sssd-tools >= %{sssd_version}
 Requires(post): policycoreutils
@@ -895,13 +899,19 @@ notifications via email (SMTP).
 Summary: Python libraries used by IPA client
 BuildArch: noarch
 %{?python_provide:%python_provide python3-ipaclient}
+%if 0%{?suse_version}
+Requires: python3-dnspython >= 1.15
+Requires: python3-Jinja2
+%else
+Requires: python3-dns >= 1.15
+Requires: python3-jinja2
+%endif
 Requires: %{name}-client-common = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 Requires: python3-ipalib = %{version}-%{release}
 Requires: python3-augeas
 Requires: augeas-libs >= %{augeas_version}
-Requires: python3-dns >= 1.15
-Requires: python3-jinja2
+
 
 %description -n python3-ipaclient
 IPA is an integrated solution to provide centrally managed Identity (users,
@@ -977,16 +987,17 @@ Requires(pre): python3-ldap >= %{python_ldap_version}
 %if 0%{?suse_version}
 Requires: python3-dbus-python
 Requires: gpg2
+Requires: python3-dnspython >= 1.15
 %else
 Requires: python3-dbus
 Requires: gnupg2
+Requires: python3-dns >= 1.15
 %endif
 Requires: keyutils
 Requires: python3-argcomplete
 Requires: python3-cffi
 Requires: python3-cryptography >= 1.6
 Requires: python3-dateutil
-Requires: python3-dns >= 1.15
 Requires: python3-gssapi >= 1.2.0
 Requires: python3-jwcrypto >= 0.4.2
 Requires: python3-libipa_hbac
