@@ -620,9 +620,13 @@ Requires: %{name}-server-common = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 # we need pre-requires since earlier versions may break upgrade
 Requires(pre): python3-ldap >= %{python_ldap_version}
+%if 0%{?suse_version}
+Requires: python3-dbus-python
+%else
+Requires: python3-dbus
+%endif
 Requires: python3-augeas
 Requires: augeas-libs >= %{augeas_version}
-Requires: python3-dbus
 Requires: python3-gssapi >= 1.2.0
 Requires: python3-ipaclient = %{version}-%{release}
 Requires: python3-kdcproxy >= %{kdcproxy_version}
@@ -788,7 +792,11 @@ Requires: libcurl >= 7.21.7-2
 %if %{with ipa_join_xml}
 Requires: xmlrpc-c >= 1.27.4
 %else
+%if 0%{?suse_version}
+Requires: libjansson4
+%else
 Requires: jansson
+%endif
 %endif
 Requires: sssd-ipa >= %{sssd_version}
 Requires: sssd-idp >= %{sssd_version}
@@ -966,13 +974,18 @@ Provides: python3-ipaplatform = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 # we need pre-requires since earlier versions may break upgrade
 Requires(pre): python3-ldap >= %{python_ldap_version}
+%if 0%{?suse_version}
+Requires: python3-dbus-python
+Requires: gpg2
+%else
+Requires: python3-dbus
 Requires: gnupg2
+%endif
 Requires: keyutils
 Requires: python3-argcomplete
 Requires: python3-cffi
 Requires: python3-cryptography >= 1.6
 Requires: python3-dateutil
-Requires: python3-dbus
 Requires: python3-dns >= 1.15
 Requires: python3-gssapi >= 1.2.0
 Requires: python3-jwcrypto >= 0.4.2
