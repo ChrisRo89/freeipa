@@ -436,6 +436,7 @@ BuildRequires:  python3-sssd-config >= %{sssd_version}
 BuildRequires:  samba-python3
 BuildRequires:  python3-python-dateutil
 BuildRequires:  python3-ipa_hbac
+BuildRequires:  mozilla-nss-tools
 %else
 BuildRequires:  python3-dns >= 1.15
 BuildRequires:  python3-jinja2
@@ -443,10 +444,10 @@ BuildRequires:  python3-sssdconfig >= %{sssd_version}
 BuildRequires:  python3-samba
 BuildRequires:  python3-dateutil
 BuildRequires:  python3-libipa_hbac
+BuildRequires:  nss-tools
 %endif
 
 BuildRequires:  git
-BuildRequires:  nss-tools
 BuildRequires:  rpmlint
 BuildRequires:  softhsm
 
@@ -826,16 +827,17 @@ Requires: xmlrpc-c >= 1.27.4
 Requires: libjansson4
 Requires: libnfsidmap1
 Requires: libnfsidmap-sss
+Requires: mozilla-nss-tools >= %{nss_version}
 %else
 Requires: jansson
 Requires: libnfsidmap
+Requires: nss-tools >= %{nss_version}
 %endif
 %endif
 Requires: sssd-ipa >= %{sssd_version}
 Requires: sssd-idp >= %{sssd_version}
 Requires: sssd-krb5 >= %{sssd_version}
 Requires: certmonger >= %{certmonger_version}
-Requires: nss-tools >= %{nss_version}
 Requires: bind-utils
 Requires: oddjob-mkhomedir
 Requires: autofs
