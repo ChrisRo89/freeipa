@@ -435,12 +435,14 @@ BuildRequires:  python3-Jinja2
 BuildRequires:  python3-sssd-config >= %{sssd_version}
 BuildRequires:  samba-python3
 BuildRequires:  python3-python-dateutil
+BuildRequires:  python3-ipa_hbac
 %else
 BuildRequires:  python3-dns >= 1.15
 BuildRequires:  python3-jinja2
 BuildRequires:  python3-sssdconfig >= %{sssd_version}
 BuildRequires:  python3-samba
 BuildRequires:  python3-dateutil
+BuildRequires:  python3-libipa_hbac
 %endif
 
 BuildRequires:  git
@@ -458,7 +460,6 @@ BuildRequires:  python3-jwcrypto >= 0.4.2
 BuildRequires:  python3-ldap >= %{python_ldap_version}
 BuildRequires:  python3-ldap >= %{python_ldap_version}
 BuildRequires:  python3-lib389 >= %{ds_version}
-BuildRequires:  python3-libipa_hbac
 BuildRequires:  python3-libsss_nss_idmap
 BuildRequires:  python3-lxml
 BuildRequires:  python3-netaddr >= %{python_netaddr_version}
@@ -792,9 +793,11 @@ Summary: IPA authentication for use on clients
 Requires: python3-sssd-config >= %{sssd_version}
 Requires: krb5-plugin-preauth-pkinit
 Requires: krb5-client
+Requires: libcurl4 >= 7.21.7-2
 %else
 Requires: python3-sssdconfig >= %{sssd_version}
 Requires: libsss_autofs
+Requires: libcurl >= 7.21.7-2
 # support pkinit with client install
 Requires: krb5-pkinit-openssl >= %{krb5_version}
 Requires: krb5-workstation >= %{krb5_version}
@@ -816,7 +819,6 @@ Requires: curl
 # NIS domain name config: /usr/lib/systemd/system/*-domainname.service
 # All Fedora 28+ and RHEL8+ contain the service in hostname package
 Requires: hostname
-Requires: libcurl >= 7.21.7-2
 %if %{with ipa_join_xml}
 Requires: xmlrpc-c >= 1.27.4
 %else
@@ -896,13 +898,14 @@ Summary: Tools to configure Samba on IPA client
 Group: System Environment/Base
 %if 0%{?suse_version}
 Requires: samba-python3
+Requires: samba-tool
 %else
 Requires: python3-samba
+Requires: samba-common-tools
 %endif
 Requires: %{name}-client = %{version}-%{release}
 Requires: samba-client
 Requires: samba-winbind
-Requires: samba-common-tools
 Requires: samba
 Requires: sssd-winbind-idmap
 Requires: tdb-tools
@@ -915,11 +918,19 @@ on the machine enrolled into a FreeIPA environment
 %package client-epn
 Summary: Tools to configure Expiring Password Notification in IPA
 Group: System Environment/Base
-Requires: %{name}-client = %{version}-%{release}
+%if 0%{?suse_version}
+Requires: systemd >= %{systemd_version}
+Requires(post): systemd >= %{systemd_version}
+Requires(preun): systemd >= %{systemd_version}
+Requires(postun): systemd >= %{systemd_version}
+%else
 Requires: systemd-units >= %{systemd_version}
 Requires(post): systemd-units >= %{systemd_version}
 Requires(preun): systemd-units >= %{systemd_version}
 Requires(postun): systemd-units >= %{systemd_version}
+%endif
+Requires: %{name}-client = %{version}-%{release}
+
 
 %description client-epn
 This package provides a service to collect and send expiring password
@@ -1020,11 +1031,13 @@ Requires: python3-dbus-python
 Requires: gpg2
 Requires: python3-dnspython >= 1.15
 Requires: python3-python-dateutil
+Requires: python3-ipa_hbac
 %else
 Requires: python3-dbus
 Requires: gnupg2
 Requires: python3-dns >= 1.15
 Requires: python3-dateutil
+Requires: python3-libipa_hbac
 %endif
 Requires: keyutils
 Requires: python3-argcomplete
@@ -1032,7 +1045,6 @@ Requires: python3-cffi
 Requires: python3-cryptography >= 1.6
 Requires: python3-gssapi >= 1.2.0
 Requires: python3-jwcrypto >= 0.4.2
-Requires: python3-libipa_hbac
 Requires: python3-netaddr >= %{python_netaddr_version}
 Requires: python3-ifaddr
 Requires: python3-packaging
