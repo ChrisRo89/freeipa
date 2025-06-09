@@ -433,10 +433,14 @@ BuildRequires:  jsl
 BuildRequires:  python3-dnspython >= 1.15
 BuildRequires:  python3-Jinja2
 BuildRequires:  python3-sssd-config >= %{sssd_version}
+BuildRequires:  samba-python3
+BuildRequires:  python3-python-dateutil
 %else
 BuildRequires:  python3-dns >= 1.15
 BuildRequires:  python3-jinja2
 BuildRequires:  python3-sssdconfig >= %{sssd_version}
+BuildRequires:  python3-samba
+BuildRequires:  python3-dateutil
 %endif
 
 BuildRequires:  git
@@ -448,7 +452,6 @@ BuildRequires:  keyutils
 BuildRequires:  python3-augeas
 BuildRequires:  python3-cffi
 BuildRequires:  python3-cryptography >= 1.6
-BuildRequires:  python3-dateutil
 BuildRequires:  python3-docker
 BuildRequires:  python3-gssapi >= 1.2.0
 BuildRequires:  python3-jwcrypto >= 0.4.2
@@ -470,7 +473,6 @@ BuildRequires:  python3-pylint
 BuildRequires:  python3-pytest-multihost
 BuildRequires:  python3-pytest-sourceorder
 BuildRequires:  python3-qrcode-core >= 5.0.0
-BuildRequires:  python3-samba
 BuildRequires:  python3-six
 BuildRequires:  python3-sss
 BuildRequires:  python3-sss-murmur
@@ -512,6 +514,12 @@ Requires: cracklib-dict-full
 Requires: 389-ds >= %{ds_version}
 Requires: mozilla-nss-tools >= %{nss_version}
 Requires: apache2-mod_auth_gssapi >= 1.5.0
+Requires: google-opensans-fonts
+Requires: systemd >= %{systemd_version}
+Requires(pre): systemd >= %{systemd_version}
+Requires(post): systemd >= %{systemd_version}
+Requires(preun): systemd >= %{systemd_version}
+Requires(postun): systemd >= %{systemd_version}
 %else
 Requires: cracklib-dicts
 Requires: 389-ds-base >= %{ds_version}
@@ -520,6 +528,12 @@ Requires: nss-tools >= %{nss_version}
 Requires: mod_auth_gssapi >= 1.5.0
 Requires: mod_ssl >= %{httpd_version}
 Requires: mod_session >= %{httpd_version}
+Requires: open-sans-fonts
+Requires: systemd-units >= %{systemd_version}
+Requires(pre): systemd-units >= %{systemd_version}
+Requires(post): systemd-units >= %{systemd_version}
+Requires(preun): systemd-units >= %{systemd_version}
+Requires(postun): systemd-units >= %{systemd_version}
 %endif
 Requires: %{name}-server-common = %{version}-%{release}
 Requires: %{name}-client = %{version}-%{release}
@@ -541,11 +555,6 @@ Requires: python3-mod_wsgi
 # 0.9.9: https://github.com/adelton/mod_lookup_identity/pull/3
 Requires: mod_lookup_identity >= 0.9.9
 Requires: acl
-Requires: systemd-units >= %{systemd_version}
-Requires(pre): systemd-units >= %{systemd_version}
-Requires(post): systemd-units >= %{systemd_version}
-Requires(preun): systemd-units >= %{systemd_version}
-Requires(postun): systemd-units >= %{systemd_version}
 Requires(pre): shadow-utils
 Requires: selinux-policy >= %{selinux_policy_version}
 Requires(post): selinux-policy-base >= %{selinux_policy_version}
@@ -559,7 +568,6 @@ Requires: tar
 Requires(pre): certmonger >= %{certmonger_version}
 Requires(pre): 389-ds-base >= %{ds_version}
 Requires: font(fontawesome)
-Requires: open-sans-fonts
 %if 0%{?fedora} >= 32 || 0%{?rhel} >= 9
 # https://pagure.io/freeipa/issue/8632
 Requires: openssl > 1.1.1i
@@ -625,9 +633,11 @@ Requires(pre): python3-ldap >= %{python_ldap_version}
 %if 0%{?suse_version}
 Requires: python3-dbus-python
 Requires: python3-sssd-config >= %{sssd_version}
+Requires: rpm
 %else
 Requires: python3-dbus
 Requires: python3-sssdconfig >= %{sssd_version}
+Requires: rpm-libs
 %endif
 Requires: python3-augeas
 Requires: augeas-libs >= %{augeas_version}
@@ -638,7 +648,6 @@ Requires: python3-lxml
 Requires: python3-pki >= %{pki_version}
 Requires: python3-pyasn1 >= 0.3.2-2
 Requires: python3-psutil
-Requires: rpm-libs
 %if 0%{?rhel}
 Requires: python3-urllib3 >= 1.24.2-3
 %else
@@ -658,9 +667,14 @@ If you are installing an IPA server, you need to install this package.
 %package server-common
 Summary: Common files used by IPA server
 BuildArch: noarch
-Requires: %{name}-client-common = %{version}-%{release}
-Requires: httpd >= %{httpd_version}
+%if 0%{?suse_version}
+Requires: systemd >= %{systemd_version}
+Requires: apache2 >= %{httpd_version}
+%else
 Requires: systemd-units >= %{systemd_version}
+Requires: httpd >= %{httpd_version}
+%endif
+Requires: %{name}-client-common = %{version}-%{release}
 %if 0%{?rhel} >= 8 && ! 0%{?eln}
 Requires: system-logos-ipa >= 80.4
 %endif
@@ -732,6 +746,11 @@ server.
 
 %package server-trust-ad
 Summary: Virtual package to install packages required for Active Directory trusts
+%if 0%{?suse_version}
+Requires: samba-python3
+%else
+Requires: python3-samba
+%endif
 Requires: %{name}-server = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 
@@ -743,7 +762,6 @@ Requires: libsss_idmap
 Obsoletes: ipa-idoverride-memberof-plugin <= 0.1
 %endif
 Requires(post): python3
-Requires: python3-samba
 Requires: python3-libsss_nss_idmap
 Requires: python3-sss
 
@@ -772,9 +790,14 @@ dependencies at once.
 Summary: IPA authentication for use on clients
 %if 0%{?suse_version}
 Requires: python3-sssd-config >= %{sssd_version}
+Requires: krb5-plugin-preauth-pkinit
+Requires: krb5-client
 %else
 Requires: python3-sssdconfig >= %{sssd_version}
 Requires: libsss_autofs
+# support pkinit with client install
+Requires: krb5-pkinit-openssl >= %{krb5_version}
+Requires: krb5-workstation >= %{krb5_version}
 %endif
 Requires: %{name}-client-common = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
@@ -783,9 +806,6 @@ Requires: python3-ipaclient = %{version}-%{release}
 Requires: python3-ldap >= %{python_ldap_version}
 Requires: cyrus-sasl-gssapi%{?_isa}
 Requires: chrony
-Requires: krb5-workstation >= %{krb5_version}
-# support pkinit with client install
-Requires: krb5-pkinit-openssl >= %{krb5_version}
 # authselect: sssd profile with-subid
 %if 0%{?fedora} >= 36
 Requires: authselect >= 1.4.0
@@ -874,8 +894,12 @@ via DNS over TLS.
 %package client-samba
 Summary: Tools to configure Samba on IPA client
 Group: System Environment/Base
-Requires: %{name}-client = %{version}-%{release}
+%if 0%{?suse_version}
+Requires: samba-python3
+%else
 Requires: python3-samba
+%endif
+Requires: %{name}-client = %{version}-%{release}
 Requires: samba-client
 Requires: samba-winbind
 Requires: samba-common-tools
@@ -908,15 +932,16 @@ BuildArch: noarch
 %if 0%{?suse_version}
 Requires: python3-dnspython >= 1.15
 Requires: python3-Jinja2
+Requires: libaugeas0 >= %{augeas_version}
 %else
 Requires: python3-dns >= 1.15
 Requires: python3-jinja2
+Requires: augeas-libs >= %{augeas_version}
 %endif
 Requires: %{name}-client-common = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 Requires: python3-ipalib = %{version}-%{release}
 Requires: python3-augeas
-Requires: augeas-libs >= %{augeas_version}
 
 
 %description -n python3-ipaclient
@@ -994,16 +1019,17 @@ Requires(pre): python3-ldap >= %{python_ldap_version}
 Requires: python3-dbus-python
 Requires: gpg2
 Requires: python3-dnspython >= 1.15
+Requires: python3-python-dateutil
 %else
 Requires: python3-dbus
 Requires: gnupg2
 Requires: python3-dns >= 1.15
+Requires: python3-dateutil
 %endif
 Requires: keyutils
 Requires: python3-argcomplete
 Requires: python3-cffi
 Requires: python3-cryptography >= 1.6
-Requires: python3-dateutila
 Requires: python3-gssapi >= 1.2.0
 Requires: python3-jwcrypto >= 0.4.2
 Requires: python3-libipa_hbac
