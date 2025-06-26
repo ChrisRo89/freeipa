@@ -114,7 +114,7 @@ def _disable_dnssec():
             conn.update_entry(entry)
 
 
-def _setup_dns_over_tls(options):
+def _request_cert_for_dns_over_tls(options):
     if os.path.isfile(paths.IPA_CA_CRT) and not options.dns_over_tls_cert:
         # request certificate for DNS over TLS, using IPA CA
         cert = paths.BIND_DNS_OVER_TLS_CRT
@@ -128,18 +128,24 @@ def _setup_dns_over_tls(options):
         constants.NAMED_USER.chown(cert, gid=constants.NAMED_GROUP.gid)
         constants.NAMED_USER.chown(key, gid=constants.NAMED_GROUP.gid)
 
+
+def _setup_dns_over_tls(options):
     # setup and enable Unbound as resolver
     forward_addrs = ["# forward-addr: specify here forwarders"]
     if options.dot_forwarders:
         forward_addrs = ["forward-addr: %s" % fw
                          for fw in options.dot_forwarders]
+    # module_config_iterator is commented out if DNSSEC validation is
+    # not disabled.
+    module_config_iterator = '' if options.no_dnssec_validation else '# '
     ipautil.copy_template_file(
         paths.UNBOUND_CONF_SRC,
         paths.UNBOUND_CONF,
         dict(
             TLS_CERT_BUNDLE_PATH=os.path.join(
                 paths.OPENSSL_CERTS_DIR, "ca-bundle.crt"),
-            FORWARD_ADDRS="\n".join(forward_addrs)
+            FORWARD_ADDRS="\n".join(forward_addrs),
+            MODULE_CONFIG_ITERATOR=module_config_iterator
         )
     )
 
@@ -430,6 +436,10 @@ def install(standalone, replica, options, api=api):
             "Certificate for DNS over TLS not specified "
             "and IPA CA is not present."
         )
+
+    if options.dns_over_tls:
+        print("Request certificate for DNS over TLS, using IPA CA")
+        _request_cert_for_dns_over_tls(options)
 
     bind = bindinstance.BindInstance(fstore, api=api)
     bind.setup(api.env.host, ip_addresses, api.env.realm, api.env.domain,

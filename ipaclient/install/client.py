@@ -1540,7 +1540,7 @@ def update_dns(server, hostname, options):
 
     update_txt = "debug\n"
     if options.dns_over_tls:
-        update_txt += "server %s 853" % server
+        update_txt += "server %s 853\n" % server
     update_txt += ipautil.template_str(DELETE_TEMPLATE_A,
                                        dict(HOSTNAME=hostname))
     update_txt += ipautil.template_str(DELETE_TEMPLATE_AAAA,
@@ -1675,13 +1675,17 @@ def client_dns(server, hostname, options):
         # setup and enable Unbound as resolver
         server_ip = str(list(dnsutil.resolve_ip_addresses(server))[0])
         forward_addr = "forward-addr: %s#%s" % (server_ip, server)
+        # module_config_iterator is commented out if DNSSEC validation is
+        # not disabled.
+        module_config_iterator = '' if options.no_dnssec_validation else '# '
         ipautil.copy_template_file(
             paths.UNBOUND_CONF_SRC,
             paths.UNBOUND_CONF,
             dict(
                 TLS_CERT_BUNDLE_PATH=os.path.join(
                     paths.OPENSSL_CERTS_DIR, "ca-bundle.crt"),
-                FORWARD_ADDRS=forward_addr
+                FORWARD_ADDRS=forward_addr,
+                MODULE_CONFIG_ITERATOR=module_config_iterator
             )
         )
         sr = services.knownservices["systemd-resolved"]
@@ -1788,7 +1792,7 @@ def update_ssh_keys(hostname, ssh_dir, options, server):
 
         update_txt = 'debug\n'
         if options.dns_over_tls:
-            update_txt += "server %s 853" % server
+            update_txt += "server %s 853\n" % server
         update_txt += 'update delete %s. IN SSHFP\nshow\nsend\n' % hostname
         for pubkey in pubkeys:
             sshfp = pubkey.fingerprint_dns_sha1()
@@ -2418,6 +2422,16 @@ def install_check(options):
 
     if not check_ip_addresses(options):
         raise ScriptError(rval=CLIENT_INSTALL_ERROR)
+
+    if options.dns_over_tls \
+       and not services.knownservices["unbound"].is_installed():
+        raise ScriptError(
+            "To enable DNS over TLS, package ipa-client-encrypted-dns must "
+            "be installed.")
+    if options.no_dnssec_validation and not options.dns_over_tls:
+        raise ScriptError(
+            "You can not specify --no-dnssec-validation option without the"
+            "--dns-over-tls option.")
 
     # Create the discovery instance
     ds = discovery.IPADiscovery()
@@ -4060,6 +4074,12 @@ class ClientInstallInterface(hostname_.HostNameInstallInterface,
         description="Configure DNS over TLS",
     )
     dns_over_tls = enroll_only(dns_over_tls)
+
+    no_dnssec_validation = knob(
+        None,
+        description="Disable DNSSEC validation for DNS over TLS",
+    )
+    no_dnssec_validation = enroll_only(no_dnssec_validation)
 
     request_cert = knob(
         None,
