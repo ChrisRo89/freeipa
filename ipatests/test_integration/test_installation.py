@@ -36,6 +36,7 @@ from ipatests.test_integration.base import IntegrationTest
 from ipatests.test_integration.test_caless import CALessBase, ipa_certs_cleanup
 from ipatests.test_integration.test_cert import get_certmonger_fs_id
 from ipatests.pytest_ipa.integration import skip_if_fips
+from ipatests.util import xfail_context
 from ipaplatform import services
 
 
@@ -587,12 +588,15 @@ class TestInstallWithCA_DNS3(CALessBase):
     ticket 7239
     """
 
-    @pytest.mark.xfail(
-        osinfo.id == 'fedora' and osinfo.version_number >= (36,),
-        reason='freeipa ticket 9135', strict=True)
     @server_install_setup
     def test_number_of_zones(self):
         """There should be two zones: one forward, one reverse"""
+
+        # Removed xfail for test_number_of_zones
+        # This test is xpass when executed in IdM-CI
+        # but still failing in PRCI. There is a different configuration
+        # in the 2 CIs and with this we will get a green test
+        # in IdM-CI nightly tests.
 
         self.create_pkcs12('ca1/server')
         self.prepare_cacert('ca1')
@@ -1624,8 +1628,18 @@ class TestKRAinstallAfterCertRenew(IntegrationTest):
 
         passwd = "{passwd}\n{passwd}\n{passwd}".format(passwd=admin_pass)
         self.master.run_command(['kinit', 'admin'], stdin_text=passwd)
-        cmd = self.master.run_command(['ipa-kra-install', '-p', dm_pass, '-U'])
-        self.master.run_command(['systemctl', 'start', 'chronyd'])
+        try:
+            # With PKI 11.6 the validity of the cert in
+            # /root/.dogtag/pki-tomcat/ca_admin.cert is checked
+            # and KRA install fails. Known IPA issue
+            pki_version = tasks.get_pki_version(self.master)
+            with xfail_context(pki_version >= tasks.parse_version('11.6.0'),
+                               'https://pagure.io/freeipa/issue/9763'):
+                cmd = self.master.run_command([
+                    'ipa-kra-install', '-p', dm_pass, '-U'
+                ])
+        finally:
+            self.master.run_command(['systemctl', 'start', 'chronyd'])
 
 
 class TestKRAinstallOnReplicaWithCAHost(IntegrationTest):

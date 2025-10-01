@@ -43,6 +43,10 @@ topologies:
     name: ad_master_1repl_1client
     cpu: 6
     memory: 12096
+  ipa_ipa_trust: &ipa_ipa_trust
+    name: ipa_ipa_trust
+    cpu: 7
+    memory: 14750
 
 jobs:
   fedora-previous/build:
@@ -1550,6 +1554,19 @@ jobs:
         timeout: 3600
         topology: *master_3client
 
+  fedora-previous/nfs_automountdiscovery:
+    requires: [fedora-previous/build]
+    priority: 50
+    job:
+      class: RunPytest
+      args:
+        build_url: '{fedora-previous/build_url}'
+        test_suite: test_integration/test_nfs.py::TestIpaClientAutomountDiscovery
+        trusted_domain: True
+        template: *ci-master-previous
+        timeout: 3600
+        topology: *ipa_ipa_trust
+
   fedora-previous/mask:
     requires: [fedora-previous/build]
     priority: 50
@@ -2155,6 +2172,18 @@ jobs:
         template: *ci-master-previous
         timeout: 7200
         topology: *ad_master_1repl_1client
+
+  fedora-previous/test_IPAMigrateBackupRestore:
+    requires: [fedora-previous/build]
+    priority: 50
+    job:
+      class: RunPytest
+      args:
+        build_url: '{fedora-previous/build_url}'
+        test_suite: test_integration/test_ipa_ipa_migration.py::TestIPAMigratewithBackupRestore
+        template: *ci-master-previous
+        timeout: 7200
+        topology: *master_2repl_1client
 
   fedora-previous/test_cockpit:
     requires: [fedora-previous/build]

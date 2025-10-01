@@ -188,25 +188,6 @@ done:
     return ret;
 }
 
-static bool
-is_tgs_princ(krb5_context kcontext, krb5_const_principal princ)
-{
-    krb5_data *primary;
-    size_t l_tgs_name;
-
-    if (2 != krb5_princ_size(kcontext, princ))
-        return false;
-
-    primary = krb5_princ_component(kcontext, princ, 0);
-
-    l_tgs_name = strlen(KRB5_TGS_NAME);
-
-    if (l_tgs_name != primary->length)
-        return false;
-
-    return 0 == memcmp(primary->data, KRB5_TGS_NAME, l_tgs_name);
-}
-
 static krb5_error_code
 cmp_local_tgs_princ(krb5_context kcontext, const char *local_realm,
                    krb5_const_principal princ, bool *result)
@@ -2080,7 +2061,7 @@ krb5_error_code ipadb_get_principal(krb5_context kcontext,
         return kerr;
 
     /* If TGS principal, some virtual attributes may be added */
-    if (is_tgs_princ(kcontext, (*entry)->princ)) {
+    if (ipadb_is_tgs_princ(kcontext, (*entry)->princ)) {
         kerr = cmp_local_tgs_princ(kcontext, ipactx->realm, (*entry)->princ,
                                    &is_local_tgs_princ);
         if (kerr)
@@ -2160,7 +2141,8 @@ void ipadb_free_principal(krb5_context kcontext, krb5_db_entry *entry)
                 for (i = 0; (acl_list != NULL) && (acl_list[i] != NULL); i++) {
                     free(acl_list[i]);
                 }
-                free(acl_list);
+                /* prev->tl_data_contents will be removed below */
+                acl_list = NULL;
             }
             free(prev->tl_data_contents);
             free(prev);
